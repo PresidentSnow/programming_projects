@@ -1,0 +1,98 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+  echo "Please provide CIDR and number of subnets"
+  exit
+fi
+
+rx='^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$';
+if ! [[ $1 =~ $rx ]];then
+ echo "Invalid CIDR";
+ exit
+fi
+
+if ! [[ "$2" =~ ^[0-9]+$ ]];then
+    echo "Integer is expected for subnets"
+    exit
+fi
+
+SUBNET=$1;
+NETWORK=`echo $SUBNET | cut -d / -f1`
+MASK_BITS=`echo $SUBNET | cut -d / -f 2`;
+
+if ! [[ "$MASK_BITS" =~ ^[0-9]+$ ]];then
+    echo "Invalid CIDR, please append mask bits eg. 11.0.0.0/24"
+    exit
+fi
+
+if [ $MASK_BITS -gt 31 ]; then 
+  echo "Invalid mask bits, it should be less than 32"
+  exit
+fi
+
+REQUIRED_SUBNETS=$2;
+MAX_SUBNETS=$((32-MASK_BITS));
+TOTAL_HOSTS=$((2**MAX_SUBNETS));
+
+if [ $TOTAL_HOSTS -lt 12 ]; then
+  echo "Required subnets should be at least 12"
+  exit
+fi 
+
+if [ $REQUIRED_SUBNETS -gt $TOTAL_HOSTS ]; then
+  echo "Required subnets should be less than the available hosts"
+  exit
+fi  
+
+round() {
+  printf "%.${2}f" "${1}"
+}
+
+get_subnets(){
+     HOSTS_ARRAY=();
+     HOSTS_ARRAY+=("$((TOTAL_HOSTS))");
+     COUNT=${#HOSTS_ARRAY[@]};
+     
+     
+      while [ $COUNT -le $REQUIRED_SUBNETS ]
+      do
+          temp=${HOSTS_ARRAY[0]}; 
+          HOSTS_ARRAY=("${HOSTS_ARRAY[@]:1}")  
+          HOSTS_ARRAY+=("$((temp/2))");
+          HOSTS_ARRAY+=("$((temp/2))");  
+          COUNT=$((${#HOSTS_ARRAY[@]}+1));
+      done
+     
+
+     for hosts in "${HOSTS_ARRAY[@]}"
+      do
+        AVL_HOSTS=$((hosts-3));
+
+        #SUBNET
+        SUBNET_MASK_BITS=$(round $(echo "scale=10; l($hosts)/l(2)" | bc -l) 0);
+        SUBNET_MASK_BITS=$((32-SUBNET_MASK_BITS));
+        SUBNET=$NETWORK/$SUBNET_MASK_BITS;
+
+        #BROADCAST
+        BROADCAST_LAST_OCTET=`echo $NETWORK | cut -d . -f 4`
+        BROADCAST=`echo $NETWORK | cut -d"." -f1-3`;
+        BROADCAST="$BROADCAST.$(($BROADCAST_LAST_OCTET+$hosts-1))";
+
+        #GATEWAY
+        NETWORK_LAST_OCTET=`echo $NETWORK | cut -d . -f 4`
+        GATEWAY=`echo $NETWORK | cut -d"." -f1-3`;
+        GATEWAY="$GATEWAY.$((NETWORK_LAST_OCTET+1))";
+
+        #display 
+        echo "subnet="$SUBNET "network="$NETWORK "broadcast="$BROADCAST "gateway="$GATEWAY "hosts="$AVL_HOSTS;
+        
+        #NETWORK
+        NETWORK_LAST_OCTET=`echo $NETWORK | cut -d . -f 4`
+        NETWORK=`echo $NETWORK | cut -d"." -f1-3`;
+        NETWORK="$NETWORK.$(($NETWORK_LAST_OCTET+$hosts))";
+
+      done
+}
+
+get_subnets;
+
