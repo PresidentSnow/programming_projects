@@ -6,9 +6,9 @@
 clear
 
 # Define paths for the source, object, and binary files.
-SRC="../src_vigenere_method/tutorial_vigenere.cpp" # source code
-BIN="../bin_vigenere_method/tutorial_vigenere" # executable
-SCRIPT="../script_vigenere_method/tutorial_vigenere.sh" # script file
+SRC="../src_vigenere_method/geek_vigenere.cpp" # source code
+BIN="../bin_vigenere_method/geek_vigenere" # executable
+SCRIPT="../script_vigenere_method/geek_vigenere.sh" # script file
 
 g++ "$SRC" -o "$BIN"
 
