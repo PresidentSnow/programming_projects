@@ -1,6 +1,0 @@
-Place to check the bash exercises:
-https://exercism.org/tracks/bash/exercises
-
-https://www.hackerrank.com/domains/shell
-
-https://www.php.cn/
