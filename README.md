@@ -1,14 +1,18 @@
-# programming_projects
+# Programming_projects
+
 Repository for manage multiple programming languages.
 
-This is a list of the programming
-language managed in in this folder:
+## List of programming language and his structure
 
-    * Assembly
-    * Bash
-    * Python
-    * Cypher programs
-    
-        - Vigènere cypher in C++
-        - Affin cypher in
-        - XOR cypher in
+* Assembly
+  * Simple exercises
+* Bash
+  * ASCII art
+  * Regular expressions
+  * Simple exercises
+  * Subnetting
+* Python
+  * Get the metadata of an image
+  * Simple exercises
+* Cypher programs
+  * Vigènere cypher in C++
